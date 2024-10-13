@@ -1,10 +1,14 @@
+require('dotenv').config();
 const { createServer } = require('http');
 const { parse } = require('url');
 const next = require('next');
+
 const dev = process.env.NODE_ENV !== 'production';
 const app = next({ dev });
 const handle = app.getRequestHandler();
-const PORT = process.env.PORT || 3000;
+
+// Use FRONTEND_PORT instead of PORT
+const PORT = process.env.FRONTEND_PORT || 3000;
 
 app.prepare().then(() => {
   createServer((req, res) => {
@@ -12,6 +16,6 @@ app.prepare().then(() => {
     handle(req, res, parsedUrl);
   }).listen(PORT, (err) => {
     if (err) throw err;
-    console.log(`> Ready on http://localhost:${PORT}`);
+    console.log(`> Next.js server ready on http://localhost:${PORT}`);
   });
 });

@@ -7,9 +7,14 @@ import { Globe, Play } from "lucide-react"
 import Link from 'next/link'
 import { useAuth } from '@/lib/hooks/useAuth'; // If keeping authentication
 import ReactPlayer from 'react-player' // For video playback
-import { FRONTEND_URL, BACKEND_URL } from '@/lib/constants'
+
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
+const FRONTEND_URL = process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3000';
 
 export default function Dashboard() {
+  console.log('Dashboard component rendering');
+  console.log('BACKEND_URL:', BACKEND_URL);
+
   const { user, signOut } = useAuth(); // If keeping authentication
   const [url, setUrl] = useState("")
   const [videoUrl, setVideoUrl] = useState("")
@@ -34,15 +39,24 @@ export default function Dashboard() {
   }
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    console.log('handleSubmit function called');
     e.preventDefault()
     setStatus("Sending request...")
     try {
-      console.log('Sending request to:', `${BACKEND_URL}/api/generate`)
-      const response = await fetch(`${BACKEND_URL}/api/generate`, {
+      const fullUrl = `${BACKEND_URL}/api/generate`
+      console.log('Sending request to:', fullUrl)
+      console.log('Request body:', JSON.stringify({ url }))
+      const response = await fetch(fullUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        mode: 'cors',
+        credentials: 'omit',
         body: JSON.stringify({ url })
       })
+      console.log('Response status:', response.status)
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
