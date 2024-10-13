@@ -6,16 +6,16 @@ error() {
     exit 1
 }
 
-# Check if GITHUB_REPLIT_TOKEN is set
-if [ -z "$GITHUB_REPLIT_TOKEN" ]; then
-    error "GITHUB_REPLIT_TOKEN is not set. Please set it with your GitHub Personal Access Token."
+# Check if GIT_REPLIT_PERSONAL_TOKEN is set
+if [ -z "$GIT_REPLIT_PERSONAL_TOKEN" ]; then
+    error "GIT_REPLIT_PERSONAL_TOKEN is not set. Please set it with your GitHub Personal Access Token."
 fi
 
 # Set Git user name
-git config --global user.name "AlexKTracerMain" || error "Failed to set Git user name"
+git config --global user.name "a19grey" || error "Failed to set Git user name"
 
 # Set Git user email
-git config --global user.email "alex@traceup.com" || error "Failed to set Git user email"
+git config --global user.email "a19grey@gmail.com" || error "Failed to set Git user email"
 
 # Set credential helper to store credentials
 git config --global credential.helper store || error "Failed to set credential helper"
@@ -24,7 +24,7 @@ git config --global credential.helper store || error "Failed to set credential h
 git config --global url."https://github.com/".insteadOf "git@github.com:" || error "Failed to set HTTPS as default"
 
 # Store the GitHub token
-echo "https://AlexKTracerMain:$GITHUB_REPLIT_TOKEN@github.com" > ~/.git-credentials
+echo "https://a19grey:$GIT_REPLIT_PERSONAL_TOKEN@github.com" > ~/.git-credentials
 chmod 600 ~/.git-credentials || error "Failed to set permissions for git credentials file"
 
 echo "Git configuration has been set up successfully:"
@@ -41,7 +41,7 @@ else
 fi
 
 # Test GitHub authentication
-if curl -s -H "Authorization: token $GITHUB_REPLIT_TOKEN" https://api.github.com/user | grep -q "login"; then
+if curl -s -H "Authorization: token $GIT_REPLIT_PERSONAL_TOKEN" https://api.github.com/user | grep -q "login"; then
     echo "GitHub authentication successful"
 else
     error "GitHub authentication failed. Please check your token."

@@ -20,15 +20,12 @@ TodayNow is an innovative application that uses generative AI to create daily su
 5. **Distribution**: The finished video is made available through our app or other specified channels.
 
 ## Tech Stack
-- **Frontend**: React with Next.js 14 App Router, TailwindCSS
-- **Backend**: Python flask api
-- **Authentication & Database**: Firebase Auth, Storage, and Database firestore
+
+- **Frontend**: React (Next.js), react-grid-layout
+- **Backend**: Python
+- **Authentication & Database**: Firebase (Authentication, Firestore)
 
 ## Using the Application
 
 1. Access the application at [Your-Deployed-URL].
 2. Log in using your Google account credentials.
-
-### License
-
-I own all things to have ever existed. I own this app. I own your app. I own your thoughts. It is all mine for I am the only thing that exists. No power in the 'verse can stop me.
