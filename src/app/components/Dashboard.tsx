@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, FormEvent } from 'react'
 import { Input } from "@/app/components/ui/input"
 import { Card } from "@/app/components/ui/card"
 import { Globe, Play } from "lucide-react"
 import Link from 'next/link'
 import { useAuth } from '@/lib/hooks/useAuth'; // If keeping authentication
 import ReactPlayer from 'react-player' // For video playback
+import { FRONTEND_URL, BACKEND_URL } from '@/lib/constants'
 
 export default function Dashboard() {
   const { user, signOut } = useAuth(); // If keeping authentication
@@ -14,6 +15,7 @@ export default function Dashboard() {
   const [videoUrl, setVideoUrl] = useState("")
   const [status, setStatus] = useState("Ready to generate your daily summary...")
   const [progress, setProgress] = useState(0)
+  const [response, setResponse] = useState("")
 
   const generateVideo = async () => {
     setStatus("Generating video...")
@@ -28,6 +30,29 @@ export default function Dashboard() {
       setStatus("Video generated successfully!")
     } catch (error) {
       setStatus("Error generating video. Please try again.")
+    }
+  }
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setStatus("Sending request...")
+    try {
+      console.log('Sending request to:', `${BACKEND_URL}/api/generate`)
+      const response = await fetch(`${BACKEND_URL}/api/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url })
+      })
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json()
+      console.log('Received response:', data)
+      setResponse(data.message)
+      setStatus("Response received!")
+    } catch (error) {
+      console.error('Error:', error);
+      setStatus(`Error connecting to backend: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -62,16 +87,26 @@ export default function Dashboard() {
           </p>
         </header>
         <div className="max-w-2xl mx-auto space-y-8">
-          <div className="relative">
-            <Input 
-              value={url}
-              onChange={(url: any) => setUrl(url.target.value)}
-              type="text" 
-              placeholder="Enter website URL (e.g., https://news.ycombinator.com)"
-              className="w-full shadow-md pl-10 pr-4 py-3 transition-all duration-300 ease-in-out hover:shadow-lg focus:ring-2 focus:ring-orange-500"
-            />
-            <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-          </div>
+          <form onSubmit={handleSubmit}>
+            <div className="relative">
+              <Input 
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                type="text" 
+                placeholder="Enter website URL (e.g., https://news.ycombinator.com)"
+                className="w-full shadow-md pl-10 pr-4 py-3 transition-all duration-300 ease-in-out hover:shadow-lg focus:ring-2 focus:ring-orange-500"
+              />
+              <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+            </div>
+            <button type="submit" className="mt-4 bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition-colors">
+              Submit
+            </button>
+          </form>
+          {response && (
+            <Card className="p-6 shadow-md bg-white">
+              <p className="text-sm text-gray-600">{response}</p>
+            </Card>
+          )}
           <Card className="aspect-video bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center text-gray-500 overflow-hidden group">
             <div className="relative">
               <Play size={48} className="text-gray-400 group-hover:text-orange-500 transition-colors duration-300" />
