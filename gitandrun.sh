@@ -50,5 +50,5 @@ fi
 echo "Git setup completed successfully. You can now use Git with your GitHub token."
 
 # Run the app
-echo "Running the app now with npm run dev & python app.py"
-npm run dev & python app.py
+# echo "Running the app now with npm run dev & python app.py"
+#npm run dev & python app.py

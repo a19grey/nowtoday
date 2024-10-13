@@ -22,26 +22,6 @@ export default function Dashboard() {
   const [progress, setProgress] = useState(0)
   const [response, setResponse] = useState("")
 
-  const generateVideo = async () => {
-    setStatus("Generating video...")
-    try {
-      const response = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url })
-      })
-      const data = await response.json()
-      if (data.video_result && data.video_result.video_url) {
-        setVideoUrl(data.video_result.video_url)
-        setStatus("Video generated successfully!")
-      } else {
-        throw new Error("Video URL not found in response")
-      }
-    } catch (error) {
-      console.error('Error generating video:', error)
-      setStatus("Error generating video. Please try again.")
-    }
-  }
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     console.log('handleSubmit function called');
@@ -68,6 +48,7 @@ export default function Dashboard() {
       const data = await response.json()
       console.log('Received response:', data)
       setResponse(data.message)
+      setVideoUrl(data.videoUrl) // Assuming the backend returns a videoUrl
       setStatus("Response received!")
     } catch (error) {
       console.error('Error:', error);
@@ -118,7 +99,7 @@ export default function Dashboard() {
               <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
             </div>
             <button type="submit" className="mt-4 bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition-colors">
-              Submit
+              Generate Video
             </button>
           </form>
           {response && (
@@ -149,13 +130,6 @@ export default function Dashboard() {
               </div>
             </div>
           </Card>
-          <button 
-            onClick={generateVideo}
-            className="mt-4 bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition-colors"
-          >
-            Generate Video
-          </button>
-
           {videoUrl && (
             <div className="mt-8">
               <h2 className="text-2xl font-bold mb-4">Generated Video</h2>

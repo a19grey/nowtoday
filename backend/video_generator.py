@@ -4,9 +4,8 @@ from heygen import generate_video_with_heygen
 import time
 
 def generate_video(content):
-    # Get the absolute path of the backend directory
-    backend_dir = os.path.dirname(os.path.abspath(__file__))
-    generated_video_path = os.path.join(backend_dir, "generated.mp4")
+    # Use a relative path for the generated video
+    generated_video_path = os.path.join("backend", "generated.mp4")
 
     start_time = time.time()
 
