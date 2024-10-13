@@ -8,8 +8,8 @@ import Link from 'next/link'
 import { useAuth } from '@/lib/hooks/useAuth'; // If keeping authentication
 import ReactPlayer from 'react-player' // For video playback
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
-const FRONTEND_URL = process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3000';
+const BACKEND_URL = 'http://localhost:5002';
+const FRONTEND_URL = 'http://localhost:3000';
 
 export default function Dashboard() {
   console.log('Dashboard component rendering');

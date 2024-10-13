@@ -1,5 +1,5 @@
 modules = ["nodejs-20", "python-3.11", "web"]
-run = "npm run dev & python app.py"
+run = ""
 
 [nix]
 channel = "stable-24_05"
@@ -13,5 +13,5 @@ localPort = 3000
 externalPort = 80
 
 [[ports]]
-localPort = 5000
-externalPort = 5000
+localPort = 5002
+externalPort = 3000

@@ -1,3 +1,6 @@
+
+#2024-10-13 1am: Fixed backend url by changing to 5002 flask port. MAC OS OWNS PORT 5000!!!! jesus fuck.
+
 # 2023-05-XX: Debugging Frontend-Backend Communication
 
 - Added more detailed logging in the frontend's `handleSubmit` function.
