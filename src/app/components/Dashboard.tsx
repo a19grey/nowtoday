@@ -1,36 +1,33 @@
 "use client";
 
-import { useState, useEffect, FormEvent } from 'react'
+import { useState, useEffect, FormEvent, useCallback } from 'react'
 import { Input } from "@/app/components/ui/input"
 import { Card } from "@/app/components/ui/card"
 import { Globe, Play } from "lucide-react"
 import Link from 'next/link'
-import { useAuth } from '@/lib/hooks/useAuth'; // If keeping authentication
-import ReactPlayer from 'react-player' // For video playback
 
 const BACKEND_URL = 'http://localhost:5002';
-const FRONTEND_URL = 'http://localhost:3000';
 
 export default function Dashboard() {
   console.log('Dashboard component rendering');
-  console.log('BACKEND_URL:', BACKEND_URL);
 
-  const { user, signOut } = useAuth(); // If keeping authentication
   const [url, setUrl] = useState("")
   const [videoUrl, setVideoUrl] = useState("")
   const [status, setStatus] = useState("Ready to generate your daily summary...")
   const [progress, setProgress] = useState(0)
   const [response, setResponse] = useState("")
+  const [refinedContent, setRefinedContent] = useState("")
+  const [videoStatus, setVideoStatus] = useState("idle") // New state for video status
 
-
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = useCallback(async (e: FormEvent<HTMLFormElement>) => {
     console.log('handleSubmit function called');
     e.preventDefault()
     setStatus("Sending request...")
+    setVideoStatus("loading")
     try {
       const fullUrl = `${BACKEND_URL}/api/generate`
-      console.log('Sending request to:', fullUrl)
-      console.log('Request body:', JSON.stringify({ url }))
+      console.log(`Sending POST request to: ${fullUrl}`);
+      console.log('Request body:', JSON.stringify({ url }));
       const response = await fetch(fullUrl, {
         method: 'POST',
         headers: { 
@@ -41,39 +38,75 @@ export default function Dashboard() {
         credentials: 'omit',
         body: JSON.stringify({ url })
       })
-      console.log('Response status:', response.status)
+      console.log('Response status:', response.status);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json()
-      console.log('Received response:', data)
+      console.log('Response data:', data);
       setResponse(data.message)
-      setVideoUrl(data.videoUrl) // Assuming the backend returns a videoUrl
+      console.log('Response message set:', data.message);
+      setRefinedContent(data.refined_content)
+      console.log('Refined content set:', data.refined_content);
+      if (data.video_result && data.video_result.video_url) {
+        setVideoUrl(data.video_result.video_url)
+        console.log('Video URL set:', data.video_result.video_url);
+      } else {
+        setVideoUrl("")
+        setVideoStatus("error")
+      }
       setStatus("Response received!")
+      console.log('Status set to: Response received!');
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error in handleSubmit:', error);
       setStatus(`Error connecting to backend: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setVideoStatus("error")
     }
-  }
+  }, [url])
+
+  useEffect(() => {
+    if (videoUrl) {
+      const checkVideo = async () => {
+        try {
+          const response = await fetch(videoUrl, { method: 'HEAD' });
+          if (response.ok) {
+            setVideoStatus("ready")
+          } else {
+            setVideoStatus("error")
+          }
+        } catch (error) {
+          console.error('Error checking video:', error);
+          setVideoStatus("error")
+        }
+      };
+      checkVideo();
+    }
+  }, [videoUrl]);
 
   useEffect(() => {
     const timer = setInterval(() => {
       setProgress((oldProgress) => {
         const newProgress = Math.min(oldProgress + 1, 100)
+        console.log('Progress updated:', newProgress);
         if (newProgress === 100) {
+          console.log('Progress reached 100%, clearing interval');
           clearInterval(timer)
         }
         return newProgress
       })
     }, 100)
-
-    return () => clearInterval(timer)
+    return () => {
+      console.log('Cleaning up progress effect');
+      clearInterval(timer)
+    }
   }, [])
+
+  console.log('Current state:', { url, videoUrl, status, progress, response, refinedContent });
 
   return (
     <div className="min-h-screen bg-gray-100 p-8 relative overflow-hidden">
       <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-gray-500" style={{backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")"}}></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-gray-500" style={{backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")"}}></div>
       </div>
       
       <div className="relative">
@@ -91,7 +124,10 @@ export default function Dashboard() {
             <div className="relative">
               <Input 
                 value={url}
-                onChange={(e) => setUrl(e.target.value)}
+                onChange={(e) => {
+                  console.log('URL input changed:', e.target.value);
+                  setUrl(e.target.value);
+                }}
                 type="text" 
                 placeholder="Enter website URL (e.g., https://news.ycombinator.com)"
                 className="w-full shadow-md pl-10 pr-4 py-3 transition-all duration-300 ease-in-out hover:shadow-lg focus:ring-2 focus:ring-orange-500"
@@ -104,17 +140,15 @@ export default function Dashboard() {
           </form>
           {response && (
             <Card className="p-6 shadow-md bg-white">
+              {console.log('Rendering response card')}
               <p className="text-sm text-gray-600">{response}</p>
+              {refinedContent && (
+                <p className="mt-4 text-sm text-gray-600">{refinedContent}</p>
+              )}
             </Card>
           )}
-          <Card className="aspect-video bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center text-gray-500 overflow-hidden group">
-            <div className="relative">
-              <Play size={48} className="text-gray-400 group-hover:text-orange-500 transition-colors duration-300" />
-              <div className="absolute inset-0 bg-orange-500 rounded-full animate-ping opacity-75"></div>
-            </div>
-            <p className="mt-4 font-medium">Video output will appear here</p>
-          </Card>
           <Card className="p-6 shadow-md bg-white">
+            {console.log('Rendering status and progress card')}
             <p className="text-sm text-gray-600 mb-4">{status}</p>
             <div className="relative pt-1">
               <div className="overflow-hidden h-24 w-24 mx-auto rounded-full bg-gray-200 shadow-inner">
@@ -130,17 +164,41 @@ export default function Dashboard() {
               </div>
             </div>
           </Card>
-          {videoUrl && (
+          {videoStatus === "ready" ? (
             <div className="mt-8">
+              {console.log('Rendering video player, URL:', videoUrl)}
               <h2 className="text-2xl font-bold mb-4">Generated Video</h2>
-              <ReactPlayer 
-                url={videoUrl} 
-                controls 
+              <video
+                src={videoUrl}
+                controls
+                crossOrigin="anonymous"
                 width="100%"
-                height="auto"
                 className="rounded-lg overflow-hidden shadow-lg"
-              />
+                onError={(e) => {
+                  console.error('Video playback error:', e);
+                  setVideoStatus("error")
+                }}
+              >
+                Your browser does not support the video tag.
+              </video>
+              <p className="mt-2 text-sm text-gray-600">Video URL: {videoUrl}</p>
             </div>
+          ) : videoStatus === "loading" ? (
+            <Card className="p-6 shadow-md bg-white">
+              <p className="text-sm text-gray-600">Loading video...</p>
+            </Card>
+          ) : videoStatus === "error" ? (
+            <Card className="p-6 shadow-md bg-white">
+              <p className="text-sm text-red-600">Error loading video. Please try again.</p>
+            </Card>
+          ) : (
+            <Card className="aspect-video bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center text-gray-500 overflow-hidden group">
+              <div className="relative">
+                <Play size={48} className="text-gray-400 group-hover:text-orange-500 transition-colors duration-300" />
+                <div className="absolute inset-0 bg-orange-500 rounded-full animate-ping opacity-75"></div>
+              </div>
+              <p className="mt-4 font-medium">Video output will appear here</p>
+            </Card>
           )}
         </div>
         <div className="mt-16 text-center">

@@ -1,6 +1,6 @@
 import os
 import sys
-from flask import Flask, jsonify, request, render_template_string
+from flask import Flask, jsonify, request, render_template_string, send_file, send_from_directory
 from flask_cors import CORS
 import logging
 import socket
@@ -15,7 +15,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Set up logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 @app.after_request
 def after_request(response):
@@ -94,6 +94,19 @@ def generate(url):
         app.logger.error(f'Error in generate: {str(e)}')
         print(f"Error occurred: {str(e)}")
         return {"error": str(e)}
+
+@app.route('/generated.mp4')
+def serve_video():
+    try:
+        video_path = os.path.join(os.getcwd(), 'generated.mp4')
+        return send_from_directory(directory=os.path.dirname(video_path), filename='generated.mp4', mimetype='video/mp4')
+    except Exception as e:
+        app.logger.error(f"Error serving video: {str(e)}")
+        return jsonify({"error": "Video not found"}), 404
+
+@app.route('/<path:filename>')
+def serve_file(filename):
+    return send_file(filename)
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
