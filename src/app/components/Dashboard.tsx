@@ -25,15 +25,20 @@ export default function Dashboard() {
   const generateVideo = async () => {
     setStatus("Generating video...")
     try {
-      const response = await fetch('/api/generate-video', {
+      const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url })
       })
       const data = await response.json()
-      setVideoUrl(data.videoUrl)
-      setStatus("Video generated successfully!")
+      if (data.video_result && data.video_result.video_url) {
+        setVideoUrl(data.video_result.video_url)
+        setStatus("Video generated successfully!")
+      } else {
+        throw new Error("Video URL not found in response")
+      }
     } catch (error) {
+      console.error('Error generating video:', error)
       setStatus("Error generating video. Please try again.")
     }
   }
@@ -87,7 +92,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-100 p-8 relative overflow-hidden">
       <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-gray-500" style={{backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")"}}></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-gray-500" style={{backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")"}}></div>
       </div>
       
       <div className="relative">
@@ -144,9 +149,24 @@ export default function Dashboard() {
               </div>
             </div>
           </Card>
-          <button onClick={generateVideo}>Generate Video</button>
+          <button 
+            onClick={generateVideo}
+            className="mt-4 bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition-colors"
+          >
+            Generate Video
+          </button>
+
           {videoUrl && (
-            <ReactPlayer url={videoUrl} controls />
+            <div className="mt-8">
+              <h2 className="text-2xl font-bold mb-4">Generated Video</h2>
+              <ReactPlayer 
+                url={videoUrl} 
+                controls 
+                width="100%"
+                height="auto"
+                className="rounded-lg overflow-hidden shadow-lg"
+              />
+            </div>
           )}
         </div>
         <div className="mt-16 text-center">

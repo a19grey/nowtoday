@@ -1,0 +1,4 @@
+{
+  "url": "https://news.ycombinator.com/",
+  "content": "Processed content: event: data\ndata: {\"title\":\"Hacker News\",\"description\":\"\",\"url\":\"https://news.ycombinator.com/\",\"content\":\"1.\\n\\n[](https://news.ycombinator.com/vote?id=41826402&how=up&goto=news)\\n\\n[Playable Counter-Strike Diffusion World Model (trained on 2x4090, 5M frames)](https://diamond-wm.github.io/) ([diamond-wm.github.io](https://news.ycombinator.com/from?site=diamond-wm.github.io))\\n\\n107 points by [francoisfleuret](https://news.ycombinator.com/user?id=francoisfleuret) [1 hour ago](https://news.ycombi..."
+}
